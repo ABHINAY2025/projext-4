@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            background: linear-gradient(to right, #D2691E, #F4A460);
+            display: flex;
+            flex-direction: column;
+            gap:20px;
+        }
+        .heading{
+            text-align: center;
+            color:white;
+            justify-content: center;
+            font-family:sans-serif;
+        }
+        .question{
+            color:white;
+            font-family:sans-serif;
+        }
+        #note{
+            background: transparent;
+            color:white;
+            font-size:20px; 
+            border:none;
+        }
+        #addtaskbtn{
+            border-radius: 10px;
+            background: transparent;
+            border:2px solid rgb(0, 0, 0);
+            box-shadow: 5px black;
+            color:rgb(0, 0, 0);
+            cursor: pointer;
+            width:60px;
+            height:30px;
+        }
+        #addtaskbtn:hover{
+            background-color: rgb(255, 255, 255);
+            transform:scale(1.2);
+        }
+        .tasks{
+            display:flex;
+            flex-direction: column;
+            gap:15px;
+        }
+        .buttondiv{
+            float: right;
+            display: flex;
+            gap:10px;
+        }
+        .taskdiv{
+            display:flex;
+            flex-direction: row;
+            gap: 20px;
+            border-radius:15px;
+            align-items: center;
+            margin-bottom: 25px;
+            background-color: rgba(255, 255, 255, 0.556);
+            justify-content: space-between;
+            transition:transform 0.5 ease-in;
+        }
+        .taskdiv:hover{
+            cursor: pointer;
+            background-color: rgb(255, 255, 255);
+            transform:scale(1.01);
+        }
+        .editbtn:hover,.deletebtn:hover{
+            background-color: rgb(231, 231, 231);
+            transform:scale(1.2);
+        }
+        .editbtn,.deletebtn{
+            border-radius: 10px;
+            background: transparent;
+            border:2px solid rgb(0, 0, 0);
+            box-shadow: 5px black;
+            color:black;
+            cursor: pointer;
+            width:60px;
+            height:30px;
+            margin-right: 15px; 
+        }
+        .taskp{
+            color: black;
+            font-family: sans-serif;
+            margin-left:10px;
+        }
+        .main-container{
+            margin: 15px;
+            padding:15px;
+            display: flex;
+            flex-direction: column;
+            gap:10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+    <div class="heading">TODO LIST</div>
+    <div class="question">WHAT'S NEXT?</div>
+    <div class="addnote">
+        <input type="text" id="note" placeholder="Type here to add note.">
+        <button id="addtaskbtn"onclick="addtask()">add</button>
+    </div>
+    <div id="tasks"></div>
+    </div>
+    <script>
+        window.onload = function () {
+            var storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            for (var i = 0; i < storedTasks.length; i++) {
+                addTaskElement(storedTasks[i]);
+            }
+        };
+
+        function addtask() {
+            var text = document.getElementById('note').value;
+            if (text !== '') {
+                var task = { text: text };
+                addTaskElement(task);
+                saveTaskToLocalStorage(task);
+                document.getElementById('note').value = '';
+            }
+        }
+
+        function addTaskElement(task) {
+            var taskdiv = document.createElement('div');
+            var taskp = document.createElement('p');
+            taskp.innerHTML = task.text;
+            taskdiv.appendChild(taskp);
+            var buttondiv=document.createElement('div');
+            var editbtn = document.createElement('button');
+            editbtn.textContent = 'Edit';
+            buttondiv.appendChild(editbtn);
+            var deletebtn = document.createElement('button');
+            deletebtn.textContent = 'Delete';
+            buttondiv.appendChild(deletebtn);
+            taskdiv.append(buttondiv);
+            document.getElementById('tasks').prepend(taskdiv);
+            taskdiv.setAttribute('class', 'taskdiv');
+            editbtn.setAttribute('class', 'editbtn');
+            deletebtn.setAttribute('class', 'deletebtn');
+            taskp.setAttribute('class', 'taskp');
+            editbtn.onclick = function () { editTask(taskdiv, task); };
+            deletebtn.onclick = function () { deleteTask(taskdiv, task); };
+        }
+
+        function editTask(taskElement, task) {
+            var newText = prompt('Edit task:', task.text);
+            if (newText !== null) {
+                task.text = newText;
+                taskElement.childNodes[0].textContent = newText;
+                saveTaskToLocalStorage(task);
+            }
+        }
+
+        function deleteTask(taskElement, task) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                taskElement.remove();
+                removeTaskFromLocalStorage(task);
+            }
+        }
+
+        function saveTaskToLocalStorage(task) {
+            var storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            storedTasks.push(task);
+            localStorage.setItem('tasks', JSON.stringify(storedTasks));
+        }
+
+        function removeTaskFromLocalStorage(task) {
+            var storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            var index = storedTasks.findIndex(function (t) {
+                return t.text === task.text;
+            });
+            if (index !== -1) {
+                storedTasks.splice(index, 1);
+                localStorage.setItem('tasks', JSON.stringify(storedTasks));
+            }
+        }
+    </script>
+</body>
+</html>
